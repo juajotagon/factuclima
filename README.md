@@ -1,0 +1,1 @@
+Sistema de gestion de cobros de empresa.
