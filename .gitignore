@@ -1,2 +1,47 @@
-.venv
-venv
+# .gitignore
+
+# Entorno virtual
+venv/
+ENV/
+env/
+.venv/
+
+# Archivos Python compilados
+__pycache__/
+*.pyc
+*.pyo
+
+# Archivos de configuración
+config.py
+
+# Archivos de VS Code
+.vscode/
+
+# Archivos de base de datos SQLite
+instance/*.db
+
+# Archivos de logs
+*.log
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos generados por editores o IDEs
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Archivos de distribución
+dist/
+build/
+*.egg-info/
+
+# Archivos de test y cobertura 
+.coverage
+.tox/
+.cache/
+nosetests.xml
+coverage.xml
+*.cover
+*.pytest_cache/

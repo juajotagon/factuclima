@@ -1,34 +1,52 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Factura</title>
+</head>
+<body>
+    <h1>Crear Nueva Factura</h1>
+    <form method="POST" action="{{ url_for('main.invoice') }}">
+        <label for="empresa">Empresa:</label>
+        <input type="text" id="empresa" name="empresa" required><br><br>
 
-{% block title %}Generar Factura{% endblock %}
+        <label for="numero_parte">Número del Parte:</label>
+        <input type="text" id="numero_parte" name="numero_parte" required><br><br>
 
-{% block content %}
-<h2>Generar Factura</h2>
-<form method="post" action="{{ url_for('main.invoice') }}">
-    <label for="product_name">Nombre del Producto:</label>
-    <input type="text" id="product_name" name="product_name">
+        <label for="ot_number">OT:</label>
+        <input type="text" id="ot_number" name="ot_number"><br><br>
 
-    <label for="product_price">Precio del Producto:</label>
-    <input type="text" id="product_price" name="product_price">
+        <label for="order_number">Número de Pedido:</label>
+        <input type="text" id="order_number" name="order_number"><br><br>
 
-    <button type="button" onclick="addProduct()">Agregar Producto</button>
+        <div id="productos">
+            <div class="producto">
+                <label for="nombre_producto">Producto:</label>
+                <input type="text" name="nombre_producto[]"><br>
 
-    <div id="additional-products"></div>
+                <label for="precio_producto">Precio:</label>
+                <input type="number" name="precio_producto[]" step="0.01"><br><br>
+            </div>
+        </div>
 
-    <button type="submit">Generar Factura</button>
-</form>
+        <button type="button" onclick="agregarProducto()">Agregar Otro Producto</button><br><br>
+        
+        <button type="submit">Guardar Factura</button>
+    </form>
 
-<script>
-function addProduct() {
-    var container = document.getElementById('additional-products');
-    var newProduct = document.createElement('div');
-    newProduct.innerHTML = `
-        <label for="product_name">Nombre del Producto:</label>
-        <input type="text" name="product_name">
-        <label for="product_price">Precio del Producto:</label>
-        <input type="text" name="product_price">
-    `;
-    container.appendChild(newProduct);
-}
-</script>
-{% endblock %}
+    <script>
+        function agregarProducto() {
+            var nuevoProducto = document.createElement('div');
+            nuevoProducto.className = 'producto';
+            nuevoProducto.innerHTML = `
+                <label for="nombre_producto">Producto:</label>
+                <input type="text" name="nombre_producto[]"><br>
+                
+                <label for="precio_producto">Precio:</label>
+                <input type="number" name="precio_producto[]" step="0.01"><br><br>
+            `;
+            document.getElementById('productos').appendChild(nuevoProducto);
+        }
+    </script>
+</body>
+</html>
