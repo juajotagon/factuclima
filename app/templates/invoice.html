@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Generar Factura{% endblock %}
+
+{% block content %}
+<h2>Generar Factura</h2>
+<form method="post" action="{{ url_for('main.invoice') }}">
+    <label for="product_name">Nombre del Producto:</label>
+    <input type="text" id="product_name" name="product_name">
+
+    <label for="product_price">Precio del Producto:</label>
+    <input type="text" id="product_price" name="product_price">
+
+    <button type="button" onclick="addProduct()">Agregar Producto</button>
+
+    <div id="additional-products"></div>
+
+    <button type="submit">Generar Factura</button>
+</form>
+
+<script>
+function addProduct() {
+    var container = document.getElementById('additional-products');
+    var newProduct = document.createElement('div');
+    newProduct.innerHTML = `
+        <label for="product_name">Nombre del Producto:</label>
+        <input type="text" name="product_name">
+        <label for="product_price">Precio del Producto:</label>
+        <input type="text" name="product_price">
+    `;
+    container.appendChild(newProduct);
+}
+</script>
+{% endblock %}

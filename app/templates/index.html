@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+<h2>Bienvenido a la Aplicación de Gestión de Cobros</h2>
+<a href="{{ url_for('main.invoice') }}">Generar Factura</a>
+{% endblock %}
