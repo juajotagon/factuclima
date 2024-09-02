@@ -18,7 +18,7 @@ config.py
 .vscode/
 
 # Archivos de base de datos SQLite
-instance/*.db
+instance/*
 
 # Archivos de logs
 *.log
