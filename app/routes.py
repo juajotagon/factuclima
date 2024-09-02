@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, send_file
 from app.models import Factura, Producto, db
+from app.utils.pdf_generator import generate_invoice_pdf  # Importa la función desde utils/pdf_generator
 from datetime import datetime
-from fpdf import FPDF
 import os
 
 main = Blueprint('main', __name__)
@@ -13,16 +13,24 @@ def index():
 @main.route('/invoice', methods=['GET', 'POST'])
 def invoice():
     if request.method == 'POST':
-        # Captura de datos como antes
+        # Captura de datos
         numero_parte = request.form.get('numero_parte')
         ot_number = request.form.get('ot_number')
         order_number = request.form.get('order_number')
         empresa = request.form.get('empresa')
 
-        nombres_productos = request.form.getlist('nombre_producto[]')
-        precios_productos = request.form.getlist('precio_producto[]')
+        # Verificación de duplicados
+        factura_existente = Factura.query.filter_by(
+            numero_parte=numero_parte,
+            ot_number=ot_number,
+            order_number=order_number
+        ).first()
 
-        # Crear la nueva factura
+        if factura_existente:
+            # Si ya existe la factura, redirigir al usuario o mostrar un mensaje
+            return f"Factura ya existe con Numero de Parte: {numero_parte}, OT: {ot_number}, Número de Pedido: {order_number}.", 400
+        
+        # Si no hay duplicados, crear la nueva factura
         nueva_factura = Factura(
             empresa=empresa,
             numero_parte=numero_parte,
@@ -34,6 +42,9 @@ def invoice():
         db.session.commit()
 
         # Crear los productos asociados a la factura
+        nombres_productos = request.form.getlist('nombre_producto[]')
+        precios_productos = request.form.getlist('precio_producto[]')
+
         for nombre, precio in zip(nombres_productos, precios_productos):
             nuevo_producto = Producto(
                 factura_id=nueva_factura.id,
@@ -52,42 +63,11 @@ def invoice():
         if os.path.exists(pdf_file_path):
             return send_file(pdf_file_path, as_attachment=True)
         else:
-            return "Error: El archivo no se generó correctamente", 500
-
-        # Enviar el archivo PDF al cliente
-        return send_file(pdf_file_path, as_attachment=True)
+            return f"Error: El archivo {pdf_file_path} no se generó correctamente", 500
 
     return render_template('invoice.html')
 
-
-def generate_invoice_pdf(factura, productos):
-    pdf = FPDF()
-    pdf.add_page()
-
-    # Configurar la fuente Arial
-    pdf.set_font("Arial", size=12)
-
-    pdf.cell(200, 10, txt="Factura", ln=True, align='C')
-
-    pdf.cell(200, 10, txt=f"Empresa: {factura.empresa}", ln=True)
-    pdf.cell(200, 10, txt=f"Número del Parte: {factura.numero_parte}", ln=True)
-    if factura.ot_number:
-        pdf.cell(200, 10, txt=f"OT: {factura.ot_number}", ln=True)
-    if factura.order_number:
-        pdf.cell(200, 10, txt=f"Número de Pedido: {factura.order_number}", ln=True)
-    pdf.cell(200, 10, txt=f"Fecha: {factura.fecha.strftime('%Y-%m-%d')}", ln=True)
-
-    pdf.ln(10)  # Espacio entre los detalles de la factura y los productos
-
-    pdf.cell(200, 10, txt="Productos:", ln=True)
-
-    for producto in productos:
-        pdf.cell(200, 10, txt=f"{producto.nombre_producto} - {producto.precio_producto} Euros", ln=True)
-
-    # Guardar PDF temporalmente
-    pdf_file_name = f"factura_{factura.id}.pdf"
-    pdf_file_path = os.path.join(os.path.abspath("instance"), pdf_file_name)
-    pdf.output(pdf_file_path)
-    pdf.close()
-
-    return pdf_file_path
+@main.route('/facturas', methods=['GET'])
+def facturas():
+    # Aquí podrías implementar la lógica para mostrar todas las facturas generadas
+    return "Página de facturas generadas (por implementar)"

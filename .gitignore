@@ -10,6 +10,7 @@ env/
 __pycache__/
 *.pyc
 *.pyo
+app/__pycache__
 
 # Archivos de configuración
 config.py
@@ -19,7 +20,7 @@ config.py
 
 # Archivos de base de datos SQLite
 instance/*
-
+app/invoices/*
 # Archivos de logs
 *.log
 
@@ -45,3 +46,5 @@ nosetests.xml
 coverage.xml
 *.cover
 *.pytest_cache/
+app/__pycache__/__init__.cpython-312.pyc
+app/__pycache__/routes.cpython-312.pyc
