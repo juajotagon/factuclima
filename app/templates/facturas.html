@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listado de Facturas</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Listado de Facturas</h1>
+
+        <!-- Formulario de Filtros -->
+        <form method="GET" action="{{ url_for('main.facturas') }}">
+            <div class="form-group">
+                <label for="numero_parte">Número del Parte:</label>
+                <input type="text" name="numero_parte" id="numero_parte" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="ot_number">OT:</label>
+                <input type="text" name="ot_number" id="ot_number" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="order_number">Número de Pedido:</label>
+                <input type="text" name="order_number" id="order_number" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="start_date">Fecha de Inicio:</label>
+                <input type="date" name="start_date" id="start_date" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="end_date">Fecha de Fin:</label>
+                <input type="date" name="end_date" id="end_date" class="form-control">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+        </form>
+
+        <!-- Tabla de Productos Filtrados -->
+        <table class="table mt-4">
+            <thead>
+                <tr>
+                    <th>Factura ID</th>
+                    <th>Número del Parte</th>
+                    <th>OT</th>
+                    <th>Número de Pedido</th>
+                    <th>Fecha</th>
+                    <th>Nombre del Producto</th>
+                    <th>Precio del Producto (Euros)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                <tr>
+                    <td>{{ producto.factura_id }}</td>
+                    <td>{{ producto.numero_parte }}</td>
+                    <td>{{ producto.ot_number }}</td>
+                    <td>{{ producto.order_number }}</td>
+                    <td>{{ producto.fecha }}</td>
+                    <td>{{ producto.nombre_producto }}</td>
+                    <td>{{ producto.precio_producto }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Mostrar el total acumulado de las facturas filtradas -->
+        <h3>Total Acumulado: {{ total_acumulado }} Euros</h3>
+    </div>
+</body>
+</html>

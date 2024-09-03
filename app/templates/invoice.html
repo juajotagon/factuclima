@@ -2,51 +2,95 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Crear Factura</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generar Factura</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Crear Nueva Factura</h1>
-    <form method="POST" action="{{ url_for('main.invoice') }}">
-        <label for="empresa">Empresa:</label>
-        <input type="text" id="empresa" name="empresa" required><br><br>
-
-        <label for="numero_parte">Número del Parte:</label>
-        <input type="text" id="numero_parte" name="numero_parte" required><br><br>
-
-        <label for="ot_number">OT:</label>
-        <input type="text" id="ot_number" name="ot_number"><br><br>
-
-        <label for="order_number">Número de Pedido:</label>
-        <input type="text" id="order_number" name="order_number"><br><br>
-
-        <div id="productos">
-            <div class="producto">
-                <label for="nombre_producto">Producto:</label>
-                <input type="text" name="nombre_producto[]"><br>
-
-                <label for="precio_producto">Precio:</label>
-                <input type="number" name="precio_producto[]" step="0.01"><br><br>
-            </div>
-        </div>
-
-        <button type="button" onclick="agregarProducto()">Agregar Otro Producto</button><br><br>
+    <div class="container">
+        <h1>Generar Factura</h1>
+        <form method="GET" action="{{ url_for('main.invoice') }}">
+            <label for="factura_select">Seleccionar Factura:</label>
+            <select name="factura_id" id="factura_select" class="form-control" onchange="this.form.submit()">
+                <option value="">Seleccione una factura</option>
+                {% for factura in facturas %}
+                    <option value="{{ factura.id }}">{{ factura.id }} - {{ factura.numero_parte }} - {{ factura.ot_number }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        <!-- Formulario para crear la factura -->
+        <form method="POST" action="{{ url_for('main.invoice') }}">
+            <label for="empresa">Empresa:</label>
+            <select id="empresa" name="empresa" required>
+                <option value="Empresa 1">Empresa 1</option>
+                <option value="Empresa 2">Empresa 2</option>
+            </select>
         
-        <button type="submit">Guardar Factura</button>
-    </form>
+            <label for="numero_parte">Número del Parte:</label>
+            <input type="text" id="numero_parte" name="numero_parte" required>
+        
+            <label for="ot_number">OT:</label>
+            <input type="text" id="ot_number" name="ot_number">
+        
+            <label for="order_number">Número de Pedido:</label>
+            <input type="text" id="order_number" name="order_number">
+        
+            <h3>Productos</h3>
+            <div id="productos">
+                <div class="producto">
+                    <label for="nombre_producto">Nombre del Producto:</label>
+                    <input type="text" id="nombre_producto" name="nombre_producto[]" required>
+        
+                    <label for="precio_producto">Precio del Producto:</label>
+                    <input type="number" id="precio_producto" name="precio_producto[]" min="0.01" step="0.01" required>
+                </div>
+            </div>
+        
+            <button type="button" onclick="agregarProducto()">Añadir Producto</button>
+            <button type="submit">Generar Factura</button>
+        </form>
+
+        <!-- Mostrar detalles de la factura si existe -->
+        {% if factura %}
+            <h2>Factura {{ factura.id }}</h2>
+            <p>Empresa: {{ factura.empresa }}</p>
+            <p>Número del Parte: {{ factura.numero_parte }}</p>
+            <p>OT: {{ factura.ot_number }}</p>
+            <p>Número de Pedido: {{ factura.order_number }}</p>
+
+            <!-- Mockup de envío de correos -->
+            <form method="POST" action="{{ url_for('main.send_invoice_mock', factura_id=factura.id) }}">
+                <button type="submit" class="btn btn-primary mt-4">Enviar Factura por Correo (Mockup)</button>
+            </form>
+
+            <!-- Mostrar estado del envío -->
+            {% if factura.correo_enviado %}
+                <p>Correo enviado el: {{ factura.fecha_envio }}</p>
+            {% else %}
+                <p>El correo no ha sido enviado.</p>
+            {% endif %}
+        {% else %}
+            <p>No hay factura seleccionada.</p>
+        {% endif %}
+    </div>
 
     <script>
-        function agregarProducto() {
-            var nuevoProducto = document.createElement('div');
-            nuevoProducto.className = 'producto';
-            nuevoProducto.innerHTML = `
-                <label for="nombre_producto">Producto:</label>
-                <input type="text" name="nombre_producto[]"><br>
-                
-                <label for="precio_producto">Precio:</label>
-                <input type="number" name="precio_producto[]" step="0.01"><br><br>
-            `;
-            document.getElementById('productos').appendChild(nuevoProducto);
-        }
+    function agregarProducto() {
+        const productosDiv = document.getElementById('productos');
+        const nuevoProducto = document.createElement('div');
+        nuevoProducto.classList.add('producto');
+
+        nuevoProducto.innerHTML = `
+            <label for="nombre_producto">Nombre del Producto:</label>
+            <input type="text" name="nombre_producto[]" class="form-control" required>
+
+            <label for="precio_producto">Precio del Producto:</label>
+            <input type="number" name="precio_producto[]" class="form-control" min="0.01" step="0.01" required>
+        `;
+
+        productosDiv.appendChild(nuevoProducto);
+    }
+
     </script>
 </body>
 </html>
