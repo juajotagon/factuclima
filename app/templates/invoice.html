@@ -69,12 +69,13 @@
         <p>Número del Parte: {{ factura.numero_parte }}</p>
         <p>OT: {{ factura.ot_number }}</p>
         <p>Número de Pedido: {{ factura.order_number }}</p>
-
+        <a href="{{ url_for('main.regenerar_factura', factura_id=factura.id) }}" class="btn btn-warning">Regenerar Factura</a>
+        <a href="{{ url_for('main.descargar_factura', factura_id=factura.id) }}" class="btn btn-secondary">Descargar Factura</a>
         <!-- Formulario para enviar la factura por correo -->
         <form id="send-invoice-form" method="POST" action="{{ url_for('main.send_invoice', factura_id=factura.id) }}">
             <button type="submit" class="btn btn-primary mt-4">Enviar Factura por Correo</button>
         </form>
-
+        
         <!-- Div para mostrar el estado del envío del correo -->
         <div id="email-status" class="mt-3">
             {% if factura.correo_enviado %}
@@ -89,47 +90,9 @@
 </div>
 
 <!-- Script para manejar la adición de productos dinámicamente y el envío de formularios via AJAX -->
-<script>
-    function agregarProducto() {
-        const productosDiv = document.getElementById('productos');
-        const nuevoProducto = document.createElement('div');
-        nuevoProducto.classList.add('producto', 'form-row');
+{% endblock %}
 
-        nuevoProducto.innerHTML = `
-            <div class="form-group col-md-6">
-                <label for="nombre_producto">Nombre del Producto:</label>
-                <input type="text" name="nombre_producto[]" class="form-control" required>
-            </div>
-            <div class="form-group col-md-6">
-                <label for="precio_producto">Precio del Producto:</label>
-                <input type="number" name="precio_producto[]" class="form-control" min="0.01" step="0.01" required>
-            </div>
-        `;
-
-        productosDiv.appendChild(nuevoProducto);
-    }
-</script>
-<script>
-    $(document).ready(function(){
-        $("#send-invoice-form").on("submit", function(event){
-            event.preventDefault();  // Previene el envío tradicional
-            console.log("Formulario interceptado"); 
-            $.ajax({
-                url: $(this).attr("action"),
-                type: "POST",
-                success: function(response) {
-                    if (response.status === 'success') {
-                        $("#email-status").html('<div class="alert alert-success">Correo enviado el: ' + response.fecha_envio + '</div>');
-                    } else {
-                        $("#email-status").html('<div class="alert alert-danger">Error al enviar el correo: ' + response.message + '</div>');
-                    }
-                },
-                error: function() {
-                    $("#email-status").html('<div class="alert alert-danger">Error al enviar el correo.</div>');
-                }
-            });
-            event.preventDefault(); 
-        });
-    });
-</script>
+{% block scripts %}
+<!-- Incluye el archivo JS -->
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
 {% endblock %}

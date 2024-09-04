@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, url_for, send_file, jsonify
-from app.models import Factura, Producto, db
+from flask import Blueprint, render_template, request, redirect, url_for, send_file, jsonify, session, flash
+from app.models import Factura, Producto, db, ConfiguracionUsuario
 from app.utils.pdf_generator import generate_invoice_pdf
 from datetime import datetime
 import os
@@ -145,3 +145,90 @@ def send_invoice(factura_id):
         })
 
     return jsonify({'status': 'error', 'message': 'Error al enviar el correo.'}), 400
+
+@main.route('/configuracion', methods=['GET'])
+def configuracion():
+    # Buscar la configuración guardada (puedes filtrar por usuario si tienes un sistema multiusuario)
+    configuracion = ConfiguracionUsuario.query.first()
+
+    return render_template(
+        'configuracion.html',
+        configuracion=configuracion
+    )
+
+
+@main.route('/configurar_archivos', methods=['POST'])
+def configurar_archivos():
+    # Obtener la ruta raíz proporcionada por el usuario
+    ruta_raiz = request.form.get('ruta_raiz', '')
+
+    # Obtener las opciones de guardar archivos
+    guardar_factura = 'guardar_factura' in request.form
+    guardar_parte = 'guardar_parte' in request.form
+    guardar_combinado = 'guardar_combinado' in request.form
+
+    # Buscar si ya existe una configuración guardada
+    configuracion = ConfiguracionUsuario.query.first()
+
+    if not configuracion:
+        # Crear nueva configuración si no existe
+        configuracion = ConfiguracionUsuario(
+            ruta_raiz=ruta_raiz,
+            guardar_factura=guardar_factura,
+            guardar_parte=guardar_parte,
+            guardar_combinado=guardar_combinado
+        )
+        db.session.add(configuracion)
+    else:
+        # Actualizar configuración existente
+        configuracion.ruta_raiz = ruta_raiz
+        configuracion.guardar_factura = guardar_factura
+        configuracion.guardar_parte = guardar_parte
+        configuracion.guardar_combinado = guardar_combinado
+
+    db.session.commit()
+    flash("Configuración guardada correctamente.", "success")
+    return redirect(url_for('main.configuracion'))
+
+
+@main.route('/descargar_factura/<int:factura_id>', methods=['GET'])
+def descargar_factura(factura_id):
+    # Obtener la factura por su ID
+    factura = Factura.query.get(factura_id)
+    
+    if not factura:
+        flash("Factura no encontrada", "danger")
+        return redirect(url_for('main.index'))
+
+    # Ruta del archivo PDF de la factura
+    pdf_file_path = os.path.join("invoices", factura.empresa, str(factura.fecha.year), str(factura.fecha.month), f"factura_{factura.id}.pdf")
+    
+    # Verificar si el archivo existe
+    if os.path.exists(pdf_file_path):
+        return send_file(pdf_file_path, as_attachment=True)
+    else:
+        flash("Archivo de factura no encontrado", "danger")
+        return redirect(url_for('main.invoice', factura_id=factura.id))
+
+@main.route('/regenerar_factura/<int:factura_id>', methods=['GET'])
+def regenerar_factura(factura_id):
+    # Obtener la factura de la base de datos
+    factura = Factura.query.get(factura_id)
+    
+    if not factura:
+        flash("Factura no encontrada", "danger")
+        return redirect(url_for('main.index'))
+
+    # Obtener los productos de la factura
+    productos = Producto.query.filter_by(factura_id=factura.id).all()
+
+    # Regenerar el PDF de la factura
+    pdf_file_path = generate_invoice_pdf(factura, productos)
+    
+    # Verificar si el archivo se generó correctamente
+    if os.path.exists(pdf_file_path):
+        flash("Factura regenerada correctamente", "success")
+        return send_file(pdf_file_path, as_attachment=True)
+    else:
+        flash("Error al regenerar la factura", "danger")
+        return redirect(url_for('main.invoice', factura_id=factura.id))

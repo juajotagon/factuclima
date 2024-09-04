@@ -29,3 +29,17 @@ class Producto(db.Model):
 
     def __repr__(self):
         return f'<Producto {self.nombre_producto} - {self.precio_producto}€>'
+
+
+class ConfiguracionUsuario(db.Model):
+    __tablename__ = 'configuraciones_usuarios'
+
+    id = db.Column(db.Integer, primary_key=True)
+    guardar_factura = db.Column(db.Boolean, default=True)
+    guardar_parte = db.Column(db.Boolean, default=True)
+    guardar_combinado = db.Column(db.Boolean, default=True)
+    ruta_archivos = db.Column(db.String(255), nullable=True)
+    usuario_id = db.Column(db.Integer, nullable=True)  # Puedes enlazar esto con la tabla de usuarios si tienes varios
+
+    def __repr__(self):
+        return f'<ConfiguracionUsuario {self.id}>'
