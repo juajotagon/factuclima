@@ -3,6 +3,8 @@
 {% block title %}Inicio{% endblock %}
 
 {% block content %}
-<h2>Bienvenido a la Aplicación de Gestión de Cobros</h2>
-<a href="{{ url_for('main.invoice') }}">Generar Factura</a>
+<div class="text-center">
+    <h2>Bienvenido a la Aplicación de Gestión de Cobros</h2>
+    <a href="{{ url_for('main.invoice') }}" class="btn btn-primary mt-3">Generar Factura</a>
+</div>
 {% endblock %}

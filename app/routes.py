@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, send_file
+from flask import Blueprint, render_template, request, redirect, url_for, send_file, jsonify
 from app.models import Factura, Producto, db
 from app.utils.pdf_generator import generate_invoice_pdf
 from datetime import datetime
@@ -128,13 +128,20 @@ def facturas():
     # Renderizar la página con los productos filtrados y el total acumulado
     return render_template('facturas.html', productos=productos_filtrados, total_acumulado=total_acumulado)
 
-@main.route('/send_invoice_mock/<int:factura_id>', methods=['POST'])
-def send_invoice_mock(factura_id):
-    factura = Factura.query.get_or_404(factura_id)
+@main.route('/send_invoice/<int:factura_id>', methods=['POST'])
+def send_invoice(factura_id):
+    # Código para enviar el correo
+    factura = Factura.query.get(factura_id)
+    if factura:
+        # Simular envío de correo
+        factura.correo_enviado = True
+        factura.fecha_envio = datetime.now()
+        db.session.commit()
 
-    factura.correo_enviado = True
-    factura.fecha_envio = datetime.now()
+        return jsonify({
+            'status': 'success',
+            'message': 'Correo enviado correctamente.',
+            'fecha_envio': factura.fecha_envio.strftime('%Y-%m-%d %H:%M:%S')
+        })
 
-    db.session.commit()
-
-    return f"Mockup: Correo enviado correctamente para la factura {factura.id}"
+    return jsonify({'status': 'error', 'message': 'Error al enviar el correo.'}), 400
